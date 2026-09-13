@@ -1,8 +1,264 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="theme-color" content="#080D18" /><meta name="description" content="Gere um catálogo JSON atualizado de criptomoedas com dados da CoinGecko." /><title>cryptos.json Studio</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="/styles.css" /></head><body>
-<div class="ambient ambient-a"></div><div class="ambient ambient-b"></div><header class="topbar"><a class="brand" href="/"><span class="brand-mark">C</span><span>cryptos.json <b>Studio</b></span></a></header>
-<main class="shell"><section class="hero"><div><div class="eyebrow">COINGECKO → JSON</div><h1>Dados cripto.<br><span>Prontos para integrar.</span></h1><p>Gere um catálogo limpo, atualizado e portátil de criptomoedas em poucos passos, direto da web.</p></div></section>
-<section class="workspace"><aside class="panel controls"><div class="panel-title"><span>Configuração</span><small>COLETA</small></div><label>Moeda de referência<select id="currency" aria-label="Moeda de referência"><option value="brl">Real (BRL)</option></select></label><div class="limit">Market cap mínimo <strong id="limit">R$ 1.000.000<br>parada automática</strong></div><button id="generate" class="primary"><span>Gerar catálogo</span><span>→</span></button><p class="privacy">A CoinGecko é consultada do maior para o menor valor de mercado. Apenas criptos com market cap de pelo menos R$ 1 milhão entram no JSON. O intervalo é automático: 5 s entre páginas e 15 s após cada bloco de 4 páginas.</p></aside>
-<section class="content"><div id="empty" class="empty panel"><div class="empty-icon">{ }</div><h2>Seu catálogo começa aqui</h2><p>Selecione a moeda e clique em <strong>Gerar catálogo</strong>.</p><div class="features"><article><b>⚡ Atualizado</b><span>Dados de mercado via CoinGecko.</span></article><article><b>◇ Compatível</b><span>JSON pronto para apps e bancos.</span></article><article><b>↓ Portátil</b><span>Download imediato em um clique.</span></article></div></div>
-<div id="progressCard" class="panel progress-card hidden"><div class="progress-head"><div><small>GERANDO CATÁLOGO</small><h2 id="progressTitle">Preparando coleta…</h2></div><strong id="progressPct">0%</strong></div><div class="track"><div id="progressBar"></div></div><div class="stats"><div><span>Página</span><b id="statPages">0</b></div><div><span>Criptos</span><b id="statCoins">0</b></div></div><div class="timers"><div><span>Próxima página</span><b id="nextPageTimer">—</b></div><div><span>Tempo estimado restante</span><b id="totalTimer">Calculando…</b></div></div><p id="progressMessage" class="muted"></p><button id="stop" class="stop-button" type="button">■ Parar coleta</button></div>
-<div id="results" class="hidden"><div class="metrics"><div class="metric"><span>Criptomoedas</span><b id="totalMetric">0</b></div><div class="metric"><span>Atualizado</span><b id="updatedMetric">—</b></div><div class="metric"><span>Fonte</span><b>CoinGecko</b></div><div class="metric"><span>Moeda</span><b id="currencyMetric">BRL</b></div></div><div class="panel table-panel"><div class="table-head"><div><small>PRÉVIA DO CATÁLOGO</small><h2>Ativos coletados</h2></div><input id="search" type="search" placeholder="Pesquisar Bitcoin, BTC ou ID…"></div><div id="tableWrap" class="table-wrap"><table><thead><tr><th>#</th><th>Ativo</th><th>Preço</th><th>24h</th><th>ID CoinGecko</th></tr></thead><tbody id="tbody"></tbody></table></div><div class="table-foot"><span id="countLabel"></span><div class="table-actions"><nav class="pagination" aria-label="Paginação da tabela"><button id="prevPage" type="button">← Anterior</button><span id="pageLabel">Página 1 de 1</span><button id="nextPage" type="button">Próxima →</button></nav><button id="download" class="primary compact">↓ Baixar cryptos.json</button></div></div></div></div><div id="error" class="error hidden"></div></section></section></main><footer>cryptos.json Studio <span>•</span> Dados fornecidos pela CoinGecko</footer><script src="/collection-policy.js" defer></script><script src="/app.js" defer></script></body></html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>cryptos.json Studio — catálogo de criptomoedas em JSON</title>
+    <meta
+      name="description"
+      content="Gere um catálogo JSON atualizado de criptomoedas com dados da CoinGecko: prévia em tabela, filtro por market cap e download imediato."
+    />
+    <meta name="theme-color" content="#060b14" />
+    <meta name="color-scheme" content="dark" />
+
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/assets/icon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="application-name" content="cryptos.json Studio" />
+    <meta name="apple-mobile-web-app-title" content="cryptos.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:title" content="cryptos.json Studio" />
+    <meta
+      property="og:description"
+      content="Catálogo JSON de criptomoedas, atualizado pela CoinGecko e pronto para integrar."
+    />
+    <meta property="og:image" content="/assets/icon-512.png" />
+    <meta name="twitter:card" content="summary" />
+
+    <link
+      rel="preload"
+      href="/assets/fonts/inter-latin-variable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+    <div class="ambient ambient-a" aria-hidden="true"></div>
+    <div class="ambient ambient-b" aria-hidden="true"></div>
+    <div class="grid-overlay" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="brand" href="/">
+        <img
+          class="brand-mark"
+          src="/assets/logo.svg"
+          alt=""
+          width="38"
+          height="38"
+          decoding="async"
+        />
+        <span class="brand-text">cryptos.json <b>Studio</b></span>
+      </a>
+      <div class="topbar-actions">
+        <span class="source-pill" title="Fonte dos dados">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          CoinGecko
+        </span>
+        <button id="install" class="ghost-button hidden" type="button" hidden>
+          <img src="/assets/logo.svg" alt="" width="18" height="18" decoding="async" />
+          <span>Instalar app</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="conteudo" class="shell">
+      <section class="hero">
+        <p class="eyebrow" data-reveal>COINGECKO → JSON</p>
+        <h1 data-reveal>Dados cripto.<br /><span>Prontos para integrar.</span></h1>
+        <p class="hero-lead" data-reveal>
+          Gere um catálogo limpo, atualizado e portátil de criptomoedas em poucos passos, direto do
+          navegador — sem servidor, sem cadastro, sem chave de API.
+        </p>
+        <ul class="hero-chips" data-reveal>
+          <li>Preços em BRL</li>
+          <li>Market cap ≥ R$ 1 mi</li>
+          <li>Download em 1 clique</li>
+        </ul>
+      </section>
+
+      <div class="workspace">
+        <aside class="panel controls" data-reveal>
+          <div class="panel-title">
+            <h2>Configuração</h2>
+            <small>COLETA</small>
+          </div>
+
+          <label for="currency">Moeda de referência</label>
+          <select id="currency">
+            <option value="brl">Real (BRL)</option>
+          </select>
+
+          <div class="limit">
+            <span>Market cap mínimo</span>
+            <strong id="limit">R$ 1.000.000<br /><span>parada automática</span></strong>
+          </div>
+
+          <button id="generate" class="primary" type="button">
+            <span>Gerar catálogo</span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </button>
+
+          <p class="privacy">
+            A CoinGecko é consultada do maior para o menor valor de mercado. Apenas criptos com
+            market cap de pelo menos R$ 1 milhão entram no JSON. O intervalo é automático: 5 s entre
+            páginas e 15 s após cada bloco de 4 páginas.
+          </p>
+        </aside>
+
+        <section class="content" aria-label="Resultado da coleta">
+          <div id="empty" class="empty panel" data-reveal>
+            <p class="empty-icon" aria-hidden="true">{ }</p>
+            <h2>Seu catálogo começa aqui</h2>
+            <p class="empty-lead">
+              Selecione a moeda e clique em <strong>Gerar catálogo</strong>.
+            </p>
+            <ul class="features">
+              <li>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z" />
+                </svg>
+                <b>Atualizado</b>
+                <span>Dados de mercado direto da CoinGecko.</span>
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M12 2.5 20.5 12 12 21.5 3.5 12 12 2.5Z" />
+                </svg>
+                <b>Compatível</b>
+                <span>JSON pronto para apps e bancos de dados.</span>
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M12 3v11m0 0 4.5-4.5M12 14l-4.5-4.5M4 19h16" />
+                </svg>
+                <b>Portátil</b>
+                <span>Download imediato, sem intermediários.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div id="progressCard" class="panel progress-card hidden">
+            <div class="progress-head">
+              <div>
+                <small>GERANDO CATÁLOGO</small>
+                <h2 id="progressTitle">Preparando coleta…</h2>
+              </div>
+              <strong id="progressPct">0%</strong>
+            </div>
+            <div
+              class="track"
+              role="progressbar"
+              aria-labelledby="progressTitle"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            >
+              <div id="progressBar"></div>
+            </div>
+            <div class="stats">
+              <div><span>Página</span><b id="statPages">0</b></div>
+              <div><span>Criptos</span><b id="statCoins">0</b></div>
+            </div>
+            <div class="timers">
+              <div><span>Próxima página</span><b id="nextPageTimer">—</b></div>
+              <div><span>Tempo estimado restante</span><b id="totalTimer">Calculando…</b></div>
+            </div>
+            <p id="progressMessage" class="muted" role="status" aria-live="polite"></p>
+            <button id="stop" class="stop-button" type="button">■ Parar coleta</button>
+          </div>
+
+          <div id="results" class="hidden">
+            <div class="metrics">
+              <div class="metric"><span>Criptomoedas</span><b id="totalMetric">0</b></div>
+              <div class="metric"><span>Atualizado</span><b id="updatedMetric">—</b></div>
+              <div class="metric"><span>Fonte</span><b>CoinGecko</b></div>
+              <div class="metric"><span>Moeda</span><b id="currencyMetric">BRL</b></div>
+            </div>
+
+            <div class="panel table-panel">
+              <div class="table-head">
+                <div>
+                  <small>PRÉVIA DO CATÁLOGO</small>
+                  <h2>Ativos coletados</h2>
+                </div>
+                <div class="search-field">
+                  <label class="sr-only" for="search">Pesquisar no catálogo</label>
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <circle cx="11" cy="11" r="6.5" />
+                    <path d="m16 16 4.5 4.5" />
+                  </svg>
+                  <input id="search" type="search" placeholder="Pesquisar Bitcoin, BTC ou ID…" />
+                </div>
+              </div>
+
+              <div
+                id="tableWrap"
+                class="table-wrap"
+                tabindex="0"
+                role="region"
+                aria-label="Prévia do catálogo — role para ver todos os ativos e colunas"
+              >
+                <table>
+                  <caption class="sr-only">
+                    Prévia dos ativos coletados, com preço, variação de 24 horas e identificador
+                    CoinGecko.
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">Ativo</th>
+                      <th scope="col">Preço</th>
+                      <th scope="col">24h</th>
+                      <th scope="col">ID CoinGecko</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody"></tbody>
+                </table>
+              </div>
+
+              <div class="table-foot">
+                <span id="countLabel" role="status" aria-live="polite"></span>
+                <div class="table-actions">
+                  <nav class="pagination" aria-label="Paginação da tabela">
+                    <button id="prevPage" type="button">← Anterior</button>
+                    <span id="pageLabel">Página 1 de 1</span>
+                    <button id="nextPage" type="button">Próxima →</button>
+                  </nav>
+                  <button id="download" class="primary compact" type="button">
+                    <span class="arrow" aria-hidden="true">↓</span>
+                    <span>Baixar cryptos.json</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p id="error" class="error hidden" role="alert"></p>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <span>cryptos.json Studio</span>
+      <span aria-hidden="true">•</span>
+      <span>Dados fornecidos pela CoinGecko</span>
+    </footer>
+
+    <script src="/vendor/gsap/gsap.min.js" defer></script>
+    <script src="/vendor/gsap/ScrollTrigger.min.js" defer></script>
+    <script src="/collection-policy.js" defer></script>
+    <script src="/app.js" defer></script>
+    <script src="/animations.js" defer></script>
+    <script src="/pwa.js" defer></script>
+  </body>
+</html>
