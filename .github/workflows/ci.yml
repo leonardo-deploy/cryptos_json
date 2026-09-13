@@ -39,4 +39,7 @@ jobs:
         run: |
           node --check collection-policy.js
           node --check app.js
-          node --test tests/test_collection_policy.cjs tests/test_markets_function.mjs
+          node --check animations.js
+          node --check pwa.js
+          node --check sw.js
+          node --test tests/test_collection_policy.cjs tests/test_markets_function.mjs tests/test_web_assets.mjs

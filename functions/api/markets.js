@@ -1,5 +1,7 @@
 const MIN_RETRY_AFTER_SECONDS = 60;
-const MAX_PAGES = 25;
+// Igual ao limite de segurança do app.js (FIXED_PAGES): a coleta pode pedir
+// até a página 40 antes de parar sozinha no piso de market cap.
+const MAX_PAGES = 40;
 const CRYPTOS_PER_PAGE = 250;
 const RESPONSE_HEADERS = {
   "content-type": "application/json; charset=utf-8",

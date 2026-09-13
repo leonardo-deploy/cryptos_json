@@ -144,6 +144,22 @@ Parâmetros disponíveis:
 | `--block-delay` | `60.0` | Pausa adicional entre blocos de quatro páginas (mínimo de 60) |
 | `--output` | `cryptos.json` | Caminho do arquivo de saída |
 
+## 🌐 Interface web e app instalável
+
+Além da versão Streamlit, o projeto tem uma interface estática publicada no
+Cloudflare Pages (`index.html`), com a mesma coleta rodando no navegador:
+
+- Tema escuro com tipografia Inter self-hosted e animações GSAP que respeitam
+  `prefers-reduced-motion`.
+- Instalável no celular: o `manifest.webmanifest` e o `apple-touch-icon` apontam
+  para os ícones da marca, então o atalho na tela de início aparece com o logo.
+- Funciona offline depois da primeira visita — `sw.js` guarda o app shell e nunca
+  cacheia `/api/*`.
+- `Content-Security-Policy` restrita a `'self'`, sem script ou estilo inline.
+
+Detalhes de deploy, cabeçalhos e geração dos ícones estão em
+[`CLOUDFLARE.md`](CLOUDFLARE.md).
+
 ## 🧪 Qualidade do código
 
 ```bash
@@ -152,13 +168,31 @@ pytest -q
 ruff check .
 ```
 
+Validações da versão web:
+
+```bash
+node --check collection-policy.js && node --check app.js
+node --test tests/test_collection_policy.cjs tests/test_markets_function.mjs tests/test_web_assets.mjs
+```
+
 ## 🗂️ Organização
 
 ```text
 .
 ├── .streamlit/config.toml    # Tema e configuração do servidor
-├── app.py                    # Interface web
+├── app.py                    # Interface Streamlit
 ├── gerar_cryptos_json.py     # Interface de linha de comando
+├── index.html                # Interface web (Cloudflare Pages)
+├── styles.css                # Tema Crypto Midnight
+├── app.js                    # Coleta paginada, prévia e download
+├── animations.js             # Animações GSAP
+├── pwa.js / sw.js            # Instalação no celular e cache do app shell
+├── manifest.webmanifest      # Nome, cores e ícones do app instalado
+├── _headers                  # CSP e demais cabeçalhos de segurança
+├── assets/                   # Logo, ícones, favicon e fonte Inter
+├── vendor/gsap/              # GSAP e ScrollTrigger self-hosted
+├── tools/generate_icons.py   # Gera os PNGs da marca a partir do logo
+├── functions/api/markets.js  # Proxy edge para a CoinGecko
 ├── src/
 │   ├── coingecko.py          # Cliente HTTP resiliente
 │   └── exporter.py           # Normalização e serialização
