@@ -440,7 +440,8 @@ h1 span {
 }
 
 select,
-input[type="search"] {
+input[type="search"],
+input[type="number"] {
   width: 100%;
   min-height: 46px;
   padding: 13px 14px;
@@ -469,7 +470,8 @@ select {
 }
 
 select:focus-visible,
-input[type="search"]:focus-visible {
+input[type="search"]:focus-visible,
+input[type="number"]:focus-visible {
   outline: none;
   border-color: var(--cyan);
   box-shadow: var(--ring);

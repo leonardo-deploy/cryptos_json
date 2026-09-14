@@ -32,7 +32,7 @@ test("honors Retry-After without retrying sooner than 60 seconds", () => {
   assert.equal(policy.getRetryDelaySeconds(75), 75);
 });
 
-test("boots the browser application with the shared collection policy", () => {
+test("boots and rejects invalid page counts before collecting", async () => {
   const listeners = {};
   const elements = new Proxy(
     {
@@ -67,13 +67,19 @@ test("boots the browser application with the shared collection policy", () => {
 
   assert.match(elements.limit.textContent, /40 páginas/);
   assert.equal(typeof listeners["generate:click"], "function");
+  for (const value of ["", "0", "51", "1.5", "invalid"]) {
+    elements.pages.value = value;
+    await listeners["generate:click"]();
+    assert.match(elements.error.textContent, /entre 1 e 50/);
+  }
 });
 
-test("browser collects all 40 pages despite low caps, short and empty pages; deduplicates IDs", async () => {
+for (const pageCount of [1, 40, 50]) test(`browser collects ${pageCount} selected pages without a cap floor`, async () => {
   const listeners = {};
   const elements = new Proxy(
     {
       currency: { value: "brl" },
+      pages: { value: String(pageCount) },
       limit: { textContent: "40 páginas de 250 criptos" },
     },
     {
@@ -123,16 +129,16 @@ test("browser collects all 40 pages despite low caps, short and empty pages; ded
 
   await listeners["generate:click"]();
 
-  assert.equal(fetchCalls, 40);
-  assert.equal(elements.totalMetric.textContent, "43");
+  assert.equal(fetchCalls, pageCount);
+  assert.equal(elements.totalMetric.textContent, String(pageCount === 1 ? 5 : pageCount + 3));
   assert.equal(elements.progressPct.textContent, "100%");
-  assert.match(elements.progressMessage.textContent, /40 páginas/);
+  assert.match(elements.progressMessage.textContent, new RegExp(`${pageCount} páginas`));
   assert.match(elements.tbody.innerHTML, /Above/);
   assert.match(elements.tbody.innerHTML, /Exact/);
   assert.match(elements.tbody.innerHTML, /Below/);
   assert.match(elements.tbody.innerHTML, /Missing/);
   const exported = vm.runInContext("exportCatalog()", context);
-  assert.equal(exported.cryptos.length, 43);
+  assert.equal(exported.cryptos.length, pageCount === 1 ? 5 : pageCount + 3);
   assert.equal(exported.cryptos.filter(c => c.symbol === "UP").length, 2);
-  assert.equal(new Set(exported.cryptos.map(c => c.id)).size, 43);
+  assert.equal(new Set(exported.cryptos.map(c => c.id)).size, pageCount === 1 ? 5 : pageCount + 3);
 });

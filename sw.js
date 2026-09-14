@@ -2,7 +2,7 @@
    Objetivo: deixar o app instalável no celular e abrir rápido mesmo offline.
    Regras: /api/* nunca é cacheado, navegação é network-first e estáticos usam
    stale-while-revalidate. Trocar CACHE_VERSION invalida o cache antigo. */
-const CACHE_VERSION = "cryptos-json-studio-v2";
+const CACHE_VERSION = "cryptos-json-studio-v3";
 const APP_SHELL = [
   "/",
   "/index.html",

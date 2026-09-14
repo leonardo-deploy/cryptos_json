@@ -6,7 +6,7 @@
     <title>cryptos.json Studio — catálogo de criptomoedas em JSON</title>
     <meta
       name="description"
-      content="Gere um catálogo JSON atualizado de criptomoedas com dados da CoinGecko: prévia em tabela, 40 páginas de 250 ativos e download imediato."
+      content="Gere um catálogo JSON atualizado de criptomoedas com dados da CoinGecko: prévia em tabela, 1 a 50 páginas de 250 ativos e download imediato."
     />
     <meta name="theme-color" content="#060b14" />
     <meta name="color-scheme" content="dark" />
@@ -81,7 +81,7 @@
         </p>
         <ul class="hero-chips" data-reveal>
           <li>Preços em BRL</li>
-          <li>Até 10.000 ativos</li>
+          <li>Até 12.500 ativos</li>
           <li>Download em 1 clique</li>
         </ul>
       </section>
@@ -98,10 +98,9 @@
             <option value="brl">Real (BRL)</option>
           </select>
 
-          <div class="limit">
-            <span>Coleta fixa</span>
-            <strong id="limit">40 páginas<br /><span>250 criptos por página</span></strong>
-          </div>
+          <label for="pages">Quantidade de páginas (1 a 50)</label>
+          <input id="pages" type="number" min="1" max="50" step="1" value="40" required aria-describedby="pagesHelp" />
+          <p id="pagesHelp" class="privacy">250 criptos por página — até 12.500 ativos.</p>
 
           <button id="generate" class="primary" type="button">
             <span>Gerar catálogo</span>
@@ -109,7 +108,7 @@
           </button>
 
           <p class="privacy">
-            A CoinGecko é consultada do maior para o menor valor de mercado. São consultadas 40 páginas de 250 criptos,
+            A CoinGecko é consultada do maior para o menor valor de mercado. É consultada a quantidade de páginas escolhida, com 250 criptos por página,
             sem corte mínimo de capitalização. O intervalo é automático: 5 s entre
             páginas e 15 s após cada bloco de 4 páginas.
           </p>

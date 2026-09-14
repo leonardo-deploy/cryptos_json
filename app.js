@@ -1,4 +1,4 @@
-const $=id=>document.getElementById(id);const FIXED_PAGES=40,FIXED_PER_PAGE=250,TABLE_PAGE_SIZE=250;let catalog=null,stopRequested=false,activeController=null,currentRows=[],currentTablePage=1;const fmt=n=>new Intl.NumberFormat('pt-BR').format(n);const policy=globalThis.CollectionPolicy||{MIN_PAGE_DELAY_SECONDS:5,BLOCK_DELAY_SECONDS:15,PAGES_PER_BLOCK:4,MAX_ATTEMPTS:4,getRetryDelaySeconds:v=>Math.max(60,Number(v)||60)};const {MIN_PAGE_DELAY_SECONDS:PAGE_DELAY,BLOCK_DELAY_SECONDS:BLOCK_DELAY,PAGES_PER_BLOCK,MAX_ATTEMPTS:MAX_RETRIES}=policy;
+const $=id=>document.getElementById(id);const MAX_PAGES=50,FIXED_PER_PAGE=250,TABLE_PAGE_SIZE=250;let catalog=null,stopRequested=false,activeController=null,currentRows=[],currentTablePage=1;const fmt=n=>new Intl.NumberFormat('pt-BR').format(n);const policy=globalThis.CollectionPolicy||{MIN_PAGE_DELAY_SECONDS:5,BLOCK_DELAY_SECONDS:15,PAGES_PER_BLOCK:4,MAX_ATTEMPTS:4,getRetryDelaySeconds:v=>Math.max(60,Number(v)||60)};const {MIN_PAGE_DELAY_SECONDS:PAGE_DELAY,BLOCK_DELAY_SECONDS:BLOCK_DELAY,PAGES_PER_BLOCK,MAX_ATTEMPTS:MAX_RETRIES}=policy;
 function show(id){['empty','progressCard','results','error'].forEach(x=>$(x).classList.toggle('hidden',x!==id))}function formatTime(sec){sec=Math.max(0,Math.ceil(sec));const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;return h?`${h}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`:m?`${m}m ${String(s).padStart(2,'0')}s`:`${s}s`}
 function estimatedWaitAfter(page,pages){let total=0;for(let p=page;p<pages;p++)total+=p%PAGES_PER_BLOCK===0?BLOCK_DELAY:PAGE_DELAY;return total}
 function progress(page,pages,count,status,msg,title){const pct=Math.round(page/pages*100);$('progressPct').textContent=`${pct}%`;$('progressBar').style.width=`${pct}%`;$('progressBar').parentElement?.setAttribute('aria-valuenow',String(pct));$('statPages').textContent=String(page);$('statCoins').textContent=fmt(count);$('progressTitle').textContent=title||(page?`Página ${page} de ${pages}`:'Preparando coleta…');$('progressMessage').textContent=msg||''}
@@ -9,14 +9,17 @@ function build(rows,currency,stopped=false){const seen=new Set(),timestamp=new D
 function finishPartial(rows,currency){if(!rows.length){show('error');$('error').textContent='Coleta interrompida antes de concluir a primeira página. Nenhum dado disponível para download.';return}catalog=build(rows,currency,true);render();show('results')}
 $('stop').addEventListener('click',()=>{stopRequested=true;$('stop').disabled=true;$('stop').textContent='Parando…';if(activeController)activeController.abort()});
 $('generate').addEventListener('click',async()=>{
+  const pages=Number($('pages').value);
+  if(!Number.isInteger(pages)||pages<1||pages>MAX_PAGES){show('error');$('error').textContent='Informe uma quantidade inteira de páginas entre 1 e 50.';return}
   const btn=$('generate');
+  $('pages').disabled=true;
   stopRequested=false;
   $('stop').disabled=false;
   $('stop').textContent='■ Parar coleta';
   btn.disabled=true;
   $('error').classList.add('hidden');
   show('progressCard');
-  const pages=FIXED_PAGES,per=FIXED_PER_PAGE,currency=$('currency').value;
+  const per=FIXED_PER_PAGE,currency=$('currency').value;
   let rows=[];
   $('nextPageTimer').textContent='Consultando…';
   $('totalTimer').textContent=formatTime(estimatedWaitAfter(0,pages));
@@ -36,7 +39,7 @@ $('generate').addEventListener('click',async()=>{
         const go=await sleepCountdown(wait,p,pages);
         if(!go)break;
       }else{
-        progress(p,pages,rows.length,'Concluído','As 40 páginas foram consultadas.');
+        progress(p,pages,rows.length,'Concluído',`As ${pages} páginas foram consultadas.`);
         $('nextPageTimer').textContent='Concluído';
         $('totalTimer').textContent='0s';
       }
@@ -53,6 +56,7 @@ $('generate').addEventListener('click',async()=>{
     }
   }finally{
     btn.disabled=false;
+    $('pages').disabled=false;
     $('stop').disabled=false;
   }
 });
