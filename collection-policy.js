@@ -16,40 +16,6 @@
   const PAGES_PER_BLOCK = 4;
   const MAX_ATTEMPTS = 4;
   const MIN_RETRY_DELAY_SECONDS = 60;
-  const MIN_MARKET_CAP_BRL = 1_000_000;
-
-  function marketCapNumber(value) {
-    if (value === null || value === undefined || value === "") return null;
-    const number = Number(value);
-    return Number.isFinite(number) ? number : null;
-  }
-
-  function normalizeMarketCapFloor(value) {
-    const number = Number(value);
-    if (!Number.isFinite(number) || number < 0) {
-      throw new RangeError("O valor de mercado mínimo deve ser um número não negativo.");
-    }
-    return number;
-  }
-
-  function filterByMinimumMarketCap(rows, minimum = MIN_MARKET_CAP_BRL) {
-    if (!Array.isArray(rows)) return [];
-    const floor = normalizeMarketCapFloor(minimum);
-    return rows.filter((row) => {
-      const marketCap = marketCapNumber(row?.market_cap);
-      return marketCap !== null && marketCap >= floor;
-    });
-  }
-
-  function hasReachedMarketCapFloor(rows, minimum = MIN_MARKET_CAP_BRL) {
-    if (!Array.isArray(rows)) return false;
-    const floor = normalizeMarketCapFloor(minimum);
-    return rows.some((row) => {
-      const marketCap = marketCapNumber(row?.market_cap);
-      return marketCap !== null && marketCap < floor;
-    });
-  }
-
   function normalizePageDelaySeconds(value) {
     const seconds = Number(value);
     if (!Number.isFinite(seconds)) {
@@ -85,11 +51,8 @@
     PAGES_PER_BLOCK,
     MAX_ATTEMPTS,
     MIN_RETRY_DELAY_SECONDS,
-    MIN_MARKET_CAP_BRL,
     normalizePageDelaySeconds,
     getWaitAfterPageSeconds,
     getRetryDelaySeconds,
-    filterByMinimumMarketCap,
-    hasReachedMarketCapFloor,
   });
 });

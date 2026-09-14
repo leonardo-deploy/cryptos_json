@@ -32,44 +32,11 @@ test("honors Retry-After without retrying sooner than 60 seconds", () => {
   assert.equal(policy.getRetryDelaySeconds(75), 75);
 });
 
-test("keeps only assets with at least R$ 1 million in market cap", () => {
-  const rows = [
-    { id: "above", market_cap: 1_500_000 },
-    { id: "exact", market_cap: 1_000_000 },
-    { id: "below", market_cap: 999_999 },
-    { id: "missing", market_cap: null },
-  ];
-
-  assert.equal(policy.MIN_MARKET_CAP_BRL, 1_000_000);
-  assert.deepEqual(
-    policy.filterByMinimumMarketCap(rows).map((row) => row.id),
-    ["above", "exact"],
-  );
-});
-
-test("detects when a market-cap ordered page crosses the floor", () => {
-  assert.equal(
-    policy.hasReachedMarketCapFloor([
-      { market_cap: 1_500_000 },
-      { market_cap: 999_999 },
-    ]),
-    true,
-  );
-  assert.equal(
-    policy.hasReachedMarketCapFloor([
-      { market_cap: 1_500_000 },
-      { market_cap: 1_000_000 },
-      { market_cap: null },
-    ]),
-    false,
-  );
-});
-
 test("boots the browser application with the shared collection policy", () => {
   const listeners = {};
   const elements = new Proxy(
     {
-      limit: { textContent: "Market cap mínimo — R$ 1.000.000" },
+      limit: { textContent: "40 páginas de 250 criptos" },
       delay: { value: "0" },
     },
     {
@@ -98,16 +65,16 @@ test("boots the browser application with the shared collection policy", () => {
     setTimeout,
   });
 
-  assert.match(elements.limit.textContent, /R\$ 1\.000\.000/);
+  assert.match(elements.limit.textContent, /40 páginas/);
   assert.equal(typeof listeners["generate:click"], "function");
 });
 
-test("browser collection filters the crossing page and stops immediately", async () => {
+test("browser collects all 40 pages despite low caps, short and empty pages; deduplicates IDs", async () => {
   const listeners = {};
   const elements = new Proxy(
     {
       currency: { value: "brl" },
-      limit: { textContent: "Market cap mínimo — R$ 1.000.000" },
+      limit: { textContent: "40 páginas de 250 criptos" },
     },
     {
       get(target, id) {
@@ -125,15 +92,20 @@ test("browser collection filters the crossing page and stops immediately", async
   const appSource = fs.readFileSync(require.resolve("../app.js"), "utf8");
   let fetchCalls = 0;
 
-  vm.runInNewContext(appSource, {
+  const context = {
     CollectionPolicy: policy,
     document: { getElementById: (id) => elements[id] },
-    fetch: async () => {
+    fetch: async (url) => {
       fetchCalls += 1;
+      assert.equal(Number(url.searchParams.get("page")), fetchCalls);
+      assert.equal(url.searchParams.get("per_page"), "250");
+      if (fetchCalls === 2) return new Response("[]");
       return new Response(JSON.stringify([
         { id: "above", symbol: "up", name: "Above", current_price: 10, market_cap: 1_500_000 },
         { id: "exact", symbol: "eq", name: "Exact", current_price: 5, market_cap: 1_000_000 },
-        { id: "below", symbol: "down", name: "Below", current_price: 1, market_cap: 999_999 },
+        { id: "below", symbol: "up", name: "Below", current_price: 1, market_cap: 999_999 },
+        { id: "missing", symbol: "missing", name: "Missing", current_price: 1, market_cap: null },
+        { id: "page-" + fetchCalls, symbol: "p", name: "Page " + fetchCalls, current_price: 1, market_cap: 0 },
       ]));
     },
     Response,
@@ -143,17 +115,24 @@ test("browser collection filters the crossing page and stops immediately", async
     Blob,
     location: { origin: "https://example.com" },
     requestAnimationFrame: (callback) => callback(),
-    setTimeout,
-    clearTimeout,
-  });
+    setTimeout: (callback, ms) => ms === 1000 ? (callback(), 0) : 0,
+    clearTimeout() {},
+  };
+  vm.createContext(context);
+  vm.runInContext(appSource, context);
 
   await listeners["generate:click"]();
 
-  assert.equal(fetchCalls, 1);
-  assert.equal(elements.totalMetric.textContent, "2");
+  assert.equal(fetchCalls, 40);
+  assert.equal(elements.totalMetric.textContent, "43");
   assert.equal(elements.progressPct.textContent, "100%");
-  assert.match(elements.progressMessage.textContent, /R\$ 1\.000\.000/);
+  assert.match(elements.progressMessage.textContent, /40 páginas/);
   assert.match(elements.tbody.innerHTML, /Above/);
   assert.match(elements.tbody.innerHTML, /Exact/);
-  assert.doesNotMatch(elements.tbody.innerHTML, /Below/);
+  assert.match(elements.tbody.innerHTML, /Below/);
+  assert.match(elements.tbody.innerHTML, /Missing/);
+  const exported = vm.runInContext("exportCatalog()", context);
+  assert.equal(exported.cryptos.length, 43);
+  assert.equal(exported.cryptos.filter(c => c.symbol === "UP").length, 2);
+  assert.equal(new Set(exported.cryptos.map(c => c.id)).size, 43);
 });

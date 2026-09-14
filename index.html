@@ -6,7 +6,7 @@
     <title>cryptos.json Studio — catálogo de criptomoedas em JSON</title>
     <meta
       name="description"
-      content="Gere um catálogo JSON atualizado de criptomoedas com dados da CoinGecko: prévia em tabela, filtro por market cap e download imediato."
+      content="Gere um catálogo JSON atualizado de criptomoedas com dados da CoinGecko: prévia em tabela, 40 páginas de 250 ativos e download imediato."
     />
     <meta name="theme-color" content="#060b14" />
     <meta name="color-scheme" content="dark" />
@@ -81,7 +81,7 @@
         </p>
         <ul class="hero-chips" data-reveal>
           <li>Preços em BRL</li>
-          <li>Market cap ≥ R$ 1 mi</li>
+          <li>Até 10.000 ativos</li>
           <li>Download em 1 clique</li>
         </ul>
       </section>
@@ -99,8 +99,8 @@
           </select>
 
           <div class="limit">
-            <span>Market cap mínimo</span>
-            <strong id="limit">R$ 1.000.000<br /><span>parada automática</span></strong>
+            <span>Coleta fixa</span>
+            <strong id="limit">40 páginas<br /><span>250 criptos por página</span></strong>
           </div>
 
           <button id="generate" class="primary" type="button">
@@ -109,8 +109,8 @@
           </button>
 
           <p class="privacy">
-            A CoinGecko é consultada do maior para o menor valor de mercado. Apenas criptos com
-            market cap de pelo menos R$ 1 milhão entram no JSON. O intervalo é automático: 5 s entre
+            A CoinGecko é consultada do maior para o menor valor de mercado. São consultadas 40 páginas de 250 criptos,
+            sem corte mínimo de capitalização. O intervalo é automático: 5 s entre
             páginas e 15 s após cada bloco de 4 páginas.
           </p>
         </aside>
