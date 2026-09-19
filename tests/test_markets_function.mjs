@@ -74,7 +74,7 @@ test("rejects invalid pagination before contacting CoinGecko", async () => {
       return new Response("[]");
     },
     async () => {
-      const response = await onRequestGet(makeContext("?page=51"));
+      const response = await onRequestGet(makeContext("?page=41"));
       assert.equal(response.status, 400);
       assert.equal(calls, 0);
     },
@@ -112,10 +112,10 @@ test("always requests 250 items per page", async () => {
       return new Response("[]");
     },
     async () => {
-      const response = await onRequestGet(makeContext("?page=50&per_page=50"));
+      const response = await onRequestGet(makeContext("?page=40&per_page=50"));
       assert.equal(response.status, 200);
       assert.equal(upstreamUrl.searchParams.get("per_page"), "250");
-      assert.equal(upstreamUrl.searchParams.get("page"), "50");
+      assert.equal(upstreamUrl.searchParams.get("page"), "40");
     },
   );
 });

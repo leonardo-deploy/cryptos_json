@@ -1142,6 +1142,31 @@ tbody tr:hover {
   }
 }
 
+/* Banner: voltou ao primeiro plano */
+.bg-banner {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  padding: 10px 20px;
+  border: 1px solid rgba(35, 199, 230, 0.35);
+  border-radius: var(--radius-pill);
+  background: rgba(7, 14, 27, 0.94);
+  backdrop-filter: blur(14px);
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  animation: slideUp 0.3s var(--ease-out);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
 /* 8. Movimento ---------------------------------------------- */
 @keyframes pulse {
   0% {
