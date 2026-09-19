@@ -1,6 +1,6 @@
 const MIN_RETRY_AFTER_SECONDS = 60;
 // Mesmo limite do seletor de páginas da interface web.
-const MAX_PAGES = 50;
+const MAX_PAGES = 40;
 const CRYPTOS_PER_PAGE = 250;
 const RESPONSE_HEADERS = {
   "content-type": "application/json; charset=utf-8",

@@ -57,7 +57,7 @@ test("boots and rejects invalid page counts before collecting", async () => {
 
   vm.runInNewContext(appSource, {
     CollectionPolicy: policy,
-    document: { getElementById: (id) => elements[id] },
+    document: { getElementById: (id) => elements[id], addEventListener: () => {}, removeEventListener: () => {} },
     Intl,
     URL,
     Blob,
@@ -67,14 +67,14 @@ test("boots and rejects invalid page counts before collecting", async () => {
 
   assert.match(elements.limit.textContent, /40 páginas/);
   assert.equal(typeof listeners["generate:click"], "function");
-  for (const value of ["", "0", "51", "1.5", "invalid"]) {
+  for (const value of ["", "0", "41", "1.5", "invalid"]) {
     elements.pages.value = value;
     await listeners["generate:click"]();
-    assert.match(elements.error.textContent, /entre 1 e 50/);
+    assert.match(elements.error.textContent, /entre 1 e 40/);
   }
 });
 
-for (const pageCount of [1, 40, 50]) test(`browser collects ${pageCount} selected pages without a cap floor`, async () => {
+for (const pageCount of [1, 40]) test(`browser collects ${pageCount} selected pages without a cap floor`, async () => {
   const listeners = {};
   const elements = new Proxy(
     {
@@ -97,10 +97,14 @@ for (const pageCount of [1, 40, 50]) test(`browser collects ${pageCount} selecte
   );
   const appSource = fs.readFileSync(require.resolve("../app.js"), "utf8");
   let fetchCalls = 0;
+  let fakeNow = 0;
+  class MockDate extends Date {
+    static now() { return (fakeNow += 1000); }
+  }
 
   const context = {
     CollectionPolicy: policy,
-    document: { getElementById: (id) => elements[id] },
+    document: { getElementById: (id) => elements[id], addEventListener: () => {}, removeEventListener: () => {} },
     fetch: async (url) => {
       fetchCalls += 1;
       assert.equal(Number(url.searchParams.get("page")), fetchCalls);
@@ -119,9 +123,9 @@ for (const pageCount of [1, 40, 50]) test(`browser collects ${pageCount} selecte
     Intl,
     URL,
     Blob,
+    Date: MockDate,
     location: { origin: "https://example.com" },
-    requestAnimationFrame: (callback) => callback(),
-    setTimeout: (callback, ms) => ms === 1000 ? (callback(), 0) : 0,
+    setTimeout: (callback, ms) => { if (ms === 0 || ms === 1000) callback(); return 0; },
     clearTimeout() {},
   };
   vm.createContext(context);
