@@ -69,16 +69,20 @@ $('prevPage').addEventListener('click',()=>goToTablePage(-1));
 $('nextPage').addEventListener('click',()=>goToTablePage(1));
 function coinThumb(row){const src=String(row.image||'');return /^https:\/\//.test(src)?`<img src="${esc(src)}" alt="" loading="lazy" width="30" height="30">`:`<span class="coin-fallback" aria-hidden="true">${esc((row.symbol||'?').slice(0,1))}</span>`}
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}$('search').addEventListener('input',e=>{if(!catalog)return;const q=e.target.value.trim().toLowerCase();renderRows(!q?catalog.cryptos:catalog.cryptos.filter(r=>r.name.toLowerCase().includes(q)||r.symbol.toLowerCase().includes(q)||r.id.toLowerCase().includes(q)))});$('download').addEventListener('click',()=>{if(!catalog)return;const blob=new Blob([JSON.stringify(exportCatalog(),null,2)],{type:'application/json;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cryptos.json';a.click();URL.revokeObjectURL(a.href)});
-let _wasHidden=false;
+let _wasHiddenDuringCollection=false;
 document.addEventListener('visibilitychange',()=>{
-  const collecting=!$('progressCard').classList.contains('hidden');
+  const isCollecting=!$('progressCard').classList.contains('hidden');
   const b=$('bgBanner');
   if(!b)return;
-  if(document.visibilityState==='hidden'&&collecting){_wasHidden=true;}
-  else if(document.visibilityState==='visible'&&_wasHidden&&collecting){
-    _wasHidden=false;
+  if(document.visibilityState==='hidden'&&isCollecting){
+    _wasHiddenDuringCollection=true;
+  }else if(document.visibilityState==='visible'&&_wasHiddenDuringCollection&&isCollecting){
+    _wasHiddenDuringCollection=false;
     b.classList.remove('hidden');
-    clearTimeout(b._t);
-    b._t=setTimeout(()=>b.classList.add('hidden'),4000);
-  }else if(!collecting){_wasHidden=false;b.classList.add('hidden');}
+    clearTimeout(b._hideTimer);
+    b._hideTimer=setTimeout(()=>b.classList.add('hidden'),4000);
+  }else if(!isCollecting){
+    _wasHiddenDuringCollection=false;
+    b.classList.add('hidden');
+  }
 });
